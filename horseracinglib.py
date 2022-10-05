@@ -193,7 +193,7 @@ class WageringStrategy:
     def __init__(self, probability_model, strategy_algorithm, strategy_prefix='undef'):
         self.probability_model = probability_model
         self.strategy_algorithm = strategy_algorithm
-        self.strategy_prefix = strategy_prefix
+        self.strategy_prefix = strategy_prefix + '(' + self.probability_model.model_prefix + ')' # incorporate model prefix into strategy prefix
         self.strategy_stakes_and_payoffs = None
     
     def calculate_strategy_stakes_and_payoffs_for_single_race(self, runners_single_race, recalculate_model_probabilities=True):
@@ -230,9 +230,7 @@ class WageringStrategyAssessment:
             self.assessment = abridged_runners_multiple_races
         
         for strategy in self.strategy_list:
-            mod_prob_col = strategy.strategy_prefix + '(' + strategy.probability_model.model_prefix + ')_'
-            wag_strat_prefix = strategy.strategy_prefix
-            self.assessment = pd.merge(self.assessment, strategy.strategy_stakes_and_payoffs[['race_id', 'runner_id', 'mod_prob', 'strat_stake', 'strat_payoff']].rename({'mod_prob': mod_prob_col + '_mod_prob', 'strat_stake': wag_strat_prefix + '_strat_stake', 'strat_payoff': wag_strat_prefix + '_strat_payoff',}, axis=1, inplace=False), how='left', on=['runner_id', 'race_id'], validate='1:1')
+            self.assessment = pd.merge(self.assessment, strategy.strategy_stakes_and_payoffs[['race_id', 'runner_id', 'mod_prob', 'strat_stake', 'strat_payoff']].rename({'mod_prob': strategy.strategy_prefix + '_mod_prob', 'strat_stake': strategy.strategy_prefix + '_strat_stake', 'strat_payoff': strategy.strategy_prefix + '_strat_payoff',}, axis=1, inplace=False), how='left', on=['runner_id', 'race_id'], validate='1:1')
         self.assessment_has_been_performed = False
     
     def perform_assessment(self):
