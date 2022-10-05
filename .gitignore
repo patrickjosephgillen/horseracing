@@ -2,3 +2,7 @@ __pycache__/horseracinglib.cpython-310.pyc
 data/runners_train.csv
 data/runners_test.csv
 data/runners.csv
+results/favourites_unit_payoff.csv
+results/favourites_unit_payoff.xlsx
+results/favourites_unit_stake.csv
+results/favourites_unit_stake.xlsx
