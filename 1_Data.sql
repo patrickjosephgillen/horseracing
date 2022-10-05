@@ -249,7 +249,7 @@ ALTER TABLE my_runners ADD COLUMN mkt_prob FLOAT AFTER sp, ADD COLUMN overage FL
 
 UPDATE my_runners 
 SET 
-    mkt_prob = 1 / (1 + sp);
+    mkt_prob = 1 / sp;
 
 DROP TABLE IF EXISTS my_temp;
 

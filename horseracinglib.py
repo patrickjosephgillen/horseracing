@@ -202,7 +202,7 @@ class WageringStrategy:
         else:
             augmented_runners_single_race = runners_single_race # called by calculate_strategy_stakes_and_payoffs_for_multiple_races()
         augmented_runners_single_race['strat_stake'] = self.strategy_algorithm(augmented_runners_single_race)
-        augmented_runners_single_race['strat_payoff'] = augmented_runners_single_race.strat_stake * augmented_runners_single_race.win * (1 + augmented_runners_single_race.sp)
+        augmented_runners_single_race['strat_payoff'] = augmented_runners_single_race.win * augmented_runners_single_race.strat_stake * augmented_runners_single_race.sp
         return pd.DataFrame({'race_id': augmented_runners_single_race.race_id, 'runner_id': augmented_runners_single_race.runner_id, 'stall_number': augmented_runners_single_race.stall_number, 'sp': augmented_runners_single_race.sp, 'win': augmented_runners_single_race.win, 'mod_prob': augmented_runners_single_race.mod_prob, 'strat_stake': augmented_runners_single_race.strat_stake, 'strat_payoff': augmented_runners_single_race.strat_payoff})
 
     def calculate_strategy_stakes_and_payoffs_for_multiple_races(self, runners_multiple_races):
