@@ -6,3 +6,4 @@ results/favourites_unit_payoff.csv
 results/favourites_unit_payoff.xlsx
 results/favourites_unit_stake.csv
 results/favourites_unit_stake.xlsx
+models/multinomial_logit_coefficients.csv
