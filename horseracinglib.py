@@ -16,7 +16,7 @@ class ProbabilityModel:
         pass
 
     def calculate_model_probabilities_for_multiple_races(self, runners_multiple_races):
-        self.model_probabilities = pd.merge(runners_multiple_races[['race_id', 'runner_id']], runners_multiple_races.groupby('race_id').apply(self.calculate_model_probabilities_for_single_race), how='left', on=['race_id', 'runner_id'], validate='1:1')
+        self.model_probabilities = pd.merge(runners_multiple_races[['race_id', 'runner_id']], runners_multiple_races.groupby('race_id', group_keys=False).apply(self.calculate_model_probabilities_for_single_race), how='left', on=['race_id', 'runner_id'], validate='1:1')
 
 class MultinomialLogitModel(ProbabilityModel):
     def __init__(self, coefficient_filename, model_prefix='undef'):
@@ -208,7 +208,7 @@ class WageringStrategy:
     def calculate_strategy_stakes_and_payoffs_for_multiple_races(self, runners_multiple_races):
         self.probability_model.calculate_model_probabilities_for_multiple_races(runners_multiple_races)
         augmented_runners_multiple_races = pd.merge(runners_multiple_races, self.probability_model.model_probabilities[['race_id', 'runner_id', 'mod_prob']], how='left', on=['race_id', 'runner_id'], validate='1:1')
-        self.strategy_stakes_and_payoffs = augmented_runners_multiple_races.groupby('race_id', as_index=False).apply(lambda rmr: self.calculate_strategy_stakes_and_payoffs_for_single_race(rmr, recalculate_model_probabilities=False))
+        self.strategy_stakes_and_payoffs = augmented_runners_multiple_races.groupby('race_id', as_index=False, group_keys=False).apply(lambda rmr: self.calculate_strategy_stakes_and_payoffs_for_single_race(rmr, recalculate_model_probabilities=False))
 
 # ----------------------------------------------------------------
 

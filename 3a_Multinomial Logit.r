@@ -14,7 +14,7 @@ train_data$win <- ifelse(train_data$win, TRUE, FALSE)
 
 # create horse ref's ("choices") for each race
 train_data <- train_data %>% group_by(race_id) %>%
-    summarize(horse.ref = 1:n(), runner_id = runner_id, runners = n(), winners = max(win)) %>%
+    reframe(horse.ref = seq_len(n()), runner_id = runner_id, runners = n(), winners = max(win)) %>%
     as.data.frame() %>%
     right_join(train_data, by = c("race_id", "runner_id"))
 
