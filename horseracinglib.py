@@ -18,6 +18,15 @@ class ProbabilityModel:
     def calculate_model_probabilities_for_multiple_races(self, runners_multiple_races):
         self.model_probabilities = pd.merge(runners_multiple_races[['race_id', 'runner_id']], runners_multiple_races.groupby('race_id', group_keys=False).apply(self.calculate_model_probabilities_for_single_race), how='left', on=['race_id', 'runner_id'], validate='1:1')
 
+    def calculate_model_accuracy(self, runners_multiple_races):
+        if self.model_probabilities is None:
+            self.calculate_model_probabilities_for_multiple_races(runners_multiple_races)
+        df = self.model_probabilities = self.model_probabilities.pivot(index='race_id', columns='stall_number', values=['mod_prob', 'win']) # credit to Cullen Sun (https://cullensun.medium.com/)
+        df = df.fillna(0)
+        correct = np.sum(np.argmax(np.array(df.iloc[:, df.columns.get_level_values(0)=='mod_prob']), axis=1) \
+            == np.argmax(np.array(df.iloc[:, df.columns.get_level_values(0)=='win']), axis=1))
+        return correct / len(df)
+
 class MultinomialLogitModel(ProbabilityModel):
     def __init__(self, coefficient_filename, model_prefix='undef'):
         super().__init__(model_prefix)
