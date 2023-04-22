@@ -5,16 +5,17 @@ from torch.utils.data import Dataset
 from torch.utils.data import DataLoader
 import numpy as np
 import math
+from sklearn.preprocessing import StandardScaler
 
 # ----------------------------------------------------------------
 
-# creates MultiIndex ('race_id', 'stall_number') and adds logical variable 'vacant' to whatever other X_columns are selected
 class RacesDataset(Dataset):
-    def __init__(self, filename, X_columns, y_columns, parse_dates=None, add_vacant=False):
+    def __init__(self, filename, X_columns, y_columns, parse_dates=None, vacant_indicator=False, scalar=None):
+
         self.runners = pd.read_csv(filename, parse_dates=parse_dates, infer_datetime_format=True)
-        
-        # add variable to indicate if stall is vacant, e.g., 10 horses leaves 6 vacant stalls
-        if add_vacant:
+
+        # variable indicating whether stall is vacant (1) or not (0), e.g., 10 horses leave 6 stalls vacant
+        if vacant_indicator:
             self.runners["vacant"] = 1
             X_columns_aug = X_columns + ["vacant"]
         else:
@@ -25,8 +26,8 @@ class RacesDataset(Dataset):
         rearranged_columns = sorted(list(self.races.columns.values))
         self.races = self.races[rearranged_columns]
         self.races = self.races.fillna(0)
-        
-        if add_vacant:
+
+        if vacant_indicator:
             self.races['vacant'] = np.logical_not(self.races['vacant']).astype(int)
         
         self.y_columns = [a == 'win' for (a, b) in self.races.columns]
@@ -34,6 +35,17 @@ class RacesDataset(Dataset):
         self.X_columns = np.logical_not(self.y_columns)
         self.X = self.races.iloc[:, self.X_columns].values
 
+        # Feature Scaling: Standardization (Standard Scaling)
+        
+        # Tried scaling continuous variables only and not output variable but results were significantly worse
+
+        if scalar is None:
+            self.scalar = StandardScaler()
+            self.X = self.scalar.fit_transform(self.X)
+        else:
+            self.scalar = scalar
+            self.X = self.scalar.transform(self.X)
+   
     def __len__(self):
         return len(self.races)
 
