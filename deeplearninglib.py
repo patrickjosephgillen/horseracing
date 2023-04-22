@@ -42,19 +42,19 @@ class RacesDataset(Dataset):
 
 # ----------------------------------------------------------------
 
-# linear-relu-linear-softwax neural net with 1 hidden layer
-class LRLS(nn.Module):
+class net(nn.Module):
     def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
         super().__init__()
 
         hidden_layer_nodes = round(math.sqrt(input_layer_nodes * output_layer_nodes)) # credit to Harpreet Singh Sachdev (https://www.linkedin.com/pulse/choosing-number-hidden-layers-neurons-neural-networks-sachdev/)
 
         self.neural_network = nn.Sequential(
-            # nn.Linear(input_layer_nodes, output_layer_nodes, bias=bias),
-            nn.Linear(input_layer_nodes, hidden_layer_nodes, bias=bias),
-            nn.ReLU(),
-            nn.Linear(hidden_layer_nodes, output_layer_nodes, bias=bias),
-            nn.Softmax(dim=1)
+            nn.Linear(input_layer_nodes, output_layer_nodes, bias=bias),
+            nn.Sigmoid()
+            # nn.Linear(input_layer_nodes, hidden_layer_nodes, bias=bias),
+            # nn.ReLU(),
+            # nn.Linear(hidden_layer_nodes, output_layer_nodes, bias=bias),
+            # nn.Softmax(dim=1)
         )
 
     def forward(self, x):
