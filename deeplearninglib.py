@@ -10,12 +10,12 @@ from sklearn.preprocessing import StandardScaler
 # ----------------------------------------------------------------
 
 class RacesDataset(Dataset):
-    def __init__(self, filename, X_columns, y_columns, parse_dates=None, vacant_indicator=False, scalar=None):
+    def __init__(self, filename, X_columns, y_columns, parse_dates=None, vacant_stall_indicator=False, scalar=None):
 
         self.runners = pd.read_csv(filename, parse_dates=parse_dates, infer_datetime_format=True)
 
         # variable indicating whether stall is vacant (1) or not (0), e.g., 10 horses leave 6 stalls vacant
-        if vacant_indicator:
+        if vacant_stall_indicator:
             self.runners["vacant"] = 1
             X_columns_aug = X_columns + ["vacant"]
         else:
@@ -27,7 +27,7 @@ class RacesDataset(Dataset):
         self.races = self.races[rearranged_columns]
         self.races = self.races.fillna(0)
 
-        if vacant_indicator:
+        if vacant_stall_indicator:
             self.races['vacant'] = np.logical_not(self.races['vacant']).astype(int)
         
         self.y_columns = [a == 'win' for (a, b) in self.races.columns]
@@ -54,19 +54,52 @@ class RacesDataset(Dataset):
 
 # ----------------------------------------------------------------
 
-class net(nn.Module):
+class LinSig(nn.Module):
+    def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
+        super().__init__()
+
+        self.neural_network = nn.Sequential(
+            nn.Linear(input_layer_nodes, output_layer_nodes, bias=bias),
+            nn.Sigmoid()
+        )
+
+    def forward(self, x):
+        logits = self.neural_network(x)
+        return logits
+
+class LinDropReluLinSoft(nn.Module):
     def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
         super().__init__()
 
         hidden_layer_nodes = round(math.sqrt(input_layer_nodes * output_layer_nodes)) # credit to Harpreet Singh Sachdev (https://www.linkedin.com/pulse/choosing-number-hidden-layers-neurons-neural-networks-sachdev/)
 
         self.neural_network = nn.Sequential(
-            nn.Linear(input_layer_nodes, output_layer_nodes, bias=bias),
-            nn.Sigmoid()
-            # nn.Linear(input_layer_nodes, hidden_layer_nodes, bias=bias),
-            # nn.ReLU(),
-            # nn.Linear(hidden_layer_nodes, output_layer_nodes, bias=bias),
-            # nn.Softmax(dim=1)
+            nn.Linear(input_layer_nodes, hidden_layer_nodes, bias=bias),
+            nn.Dropout(p=0.1),
+            nn.ReLU(),
+            nn.Linear(hidden_layer_nodes, output_layer_nodes, bias=bias),
+            nn.Softmax(dim=1)
+        )
+
+    def forward(self, x):
+        logits = self.neural_network(x)
+        return logits
+
+##############################
+# *** UNDER CONSTRUCTION *** #
+##############################
+class CustLinSoft(nn.Module):
+    def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
+        super().__init__()
+
+        hidden_layer_nodes = round(math.sqrt(input_layer_nodes * output_layer_nodes)) # credit to Harpreet Singh Sachdev (https://www.linkedin.com/pulse/choosing-number-hidden-layers-neurons-neural-networks-sachdev/)
+
+        self.neural_network = nn.Sequential(
+            nn.Linear(input_layer_nodes, hidden_layer_nodes, bias=bias),
+            nn.Dropout(p=0.1),
+            nn.ReLU(),
+            nn.Linear(hidden_layer_nodes, output_layer_nodes, bias=bias),
+            nn.Softmax(dim=1)
         )
 
     def forward(self, x):
