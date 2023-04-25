@@ -67,6 +67,19 @@ class LinSig(nn.Module):
         logits = self.neural_network(x)
         return logits
 
+class LinSoft(nn.Module):
+    def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
+        super().__init__()
+
+        self.neural_network = nn.Sequential(
+            nn.Linear(input_layer_nodes, output_layer_nodes, bias=bias),
+            nn.Softmax(dim=1)
+        )
+
+    def forward(self, x):
+        logits = self.neural_network(x)
+        return logits
+
 class LinDropReluLinSoft(nn.Module):
     def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
         super().__init__()
@@ -85,26 +98,74 @@ class LinDropReluLinSoft(nn.Module):
         logits = self.neural_network(x)
         return logits
 
-##############################
-# *** UNDER CONSTRUCTION *** #
-##############################
-class CustLinSoft(nn.Module):
-    def __init__(self, input_layer_nodes, output_layer_nodes, bias=False):
+######################
+# UNDER CONSTRUCTION #
+######################
+
+class MLR(nn.Module):
+    """ Parsimonious version of LinSoft intended to replicate a multinomial logit regression with
+    alternative specific variables and generic coefficients only """
+    def __init__(self, input_layer_nodes, output_layer_nodes, bias=None): # bias is unused argument and will be ignored
         super().__init__()
+        
+        # Check if output_layer_nodes is an integer multiple of input_layer_nodes
+        if input_layer_nodes % output_layer_nodes != 0:
+            raise ValueError("inputt_layer_nodes must be an integer multiple of output_layer_nodes")
+        
+        self.input_size = input_layer_nodes
+        self.output_size = output_layer_nodes
+        
+        self.coefficient_size = input_layer_nodes // output_layer_nodes
 
-        hidden_layer_nodes = round(math.sqrt(input_layer_nodes * output_layer_nodes)) # credit to Harpreet Singh Sachdev (https://www.linkedin.com/pulse/choosing-number-hidden-layers-neurons-neural-networks-sachdev/)
-
-        self.neural_network = nn.Sequential(
-            nn.Linear(input_layer_nodes, hidden_layer_nodes, bias=bias),
-            nn.Dropout(p=0.1),
-            nn.ReLU(),
-            nn.Linear(hidden_layer_nodes, output_layer_nodes, bias=bias),
-            nn.Softmax(dim=1)
-        )
+        weights = torch.zeros(self.coefficient_size)
+        self.weights = nn.Parameter(weights)  # nn.Parameter is a Tensor that's a module parameter.
+    
+        # Xavier (Glorot) initialization
+        nn.init.xavier_uniform_(self.weights.view(1, self.coefficient_size))
 
     def forward(self, x):
-        logits = self.neural_network(x)
+        # Reshape the weights tensor to (1, coefficient_size) and expand it to match the number of nodes in the input layer
+        expanded_weights = self.weights.view(1, self.coefficient_size).expand(self.output_size, self.coefficient_size)
+
+        # Reshape the input_layer_nodes tensor to (n, output_size, coefficient_size)
+        n = x.shape[0]
+        reshaped_input = x.view(n, self.output_size, self.coefficient_size)
+
+        # Calculate the element-wise product and sum along the second dimension to compute the utilities
+        # utilities = torch.sum(expanded_weights * reshaped_input, dim=2)
+
+        # logits = torch.nn.functional.softmax(utilities, dim=1)
+
+        # utilities = torch.mm(reshaped_input, expanded_weights.t())
+        utilities = torch.matmul(reshaped_input, self.weights.view(1, self.coefficient_size).t())
+
+        logits = torch.nn.functional.softmax(utilities.view(n, self.output_size), dim=1)
+
         return logits
+
+######################
+# FOR REFERENCE ONLY #
+######################
+
+class MyLinearLayer(nn.Module): # Source: https://auro-227.medium.com/writing-a-custom-layer-in-pytorch-14ab6ac94b77
+    """ Custom linear layer but mimics a standard linear layer """
+    def __init__(self, size_in, size_out):
+        super().__init__()
+        self.size_in, self.size_out = size_in, size_out
+        weights = torch.Tensor(size_out, size_in)
+        self.weights = nn.Parameter(weights)  # nn.Parameter is a Tensor that's a module parameter.
+        bias = torch.Tensor(size_out)
+        self.bias = nn.Parameter(bias)
+
+        # initialize weights and biases
+        nn.init.kaiming_uniform_(self.weights, a=math.sqrt(5)) # weight init
+        fan_in, _ = nn.init._calculate_fan_in_and_fan_out(self.weights)
+        bound = 1 / math.sqrt(fan_in)
+        nn.init.uniform_(self.bias, -bound, bound)  # bias init
+
+    def forward(self, x):
+        w_times_x = torch.mm(x, self.weights.t())
+        return torch.add(w_times_x, self.bias)  # w times x + b
 
 # ----------------------------------------------------------------
 
