@@ -35,10 +35,8 @@ class RacesDataset(Dataset):
         self.X_columns = np.logical_not(self.y_columns)
         self.X = self.races.iloc[:, self.X_columns].values
 
-        # Feature Scaling: Standardization (Standard Scaling)
+        # Feature Scaling: Standardization (Standard Scaling), applied to all input and output variables, both continuous and binary
         
-        # Tried scaling continuous variables only and not output variable but results were significantly worse
-
         if scalar is None:
             self.scalar = StandardScaler()
             self.X = self.scalar.fit_transform(self.X)
@@ -98,14 +96,9 @@ class LinDropReluLinSoft(nn.Module):
         logits = self.neural_network(x)
         return logits
 
-######################
-# UNDER CONSTRUCTION #
-######################
-
-class MLR(nn.Module):
-    """ Parsimonious version of LinSoft intended to replicate a multinomial logit regression with
-    alternative specific variables and generic coefficients only """
-    def __init__(self, input_layer_nodes, output_layer_nodes, bias=None): # bias is unused argument and will be ignored
+class ParsLin(nn.Module):
+    """ Parsimonious version of Linear """
+    def __init__(self, input_layer_nodes, output_layer_nodes):
         super().__init__()
         
         # Check if output_layer_nodes is an integer multiple of input_layer_nodes
@@ -124,23 +117,34 @@ class MLR(nn.Module):
         nn.init.xavier_uniform_(self.weights.view(1, self.coefficient_size))
 
     def forward(self, x):
-        # Reshape the weights tensor to (1, coefficient_size) and expand it to match the number of nodes in the input layer
-        expanded_weights = self.weights.view(1, self.coefficient_size).expand(self.output_size, self.coefficient_size)
-
-        # Reshape the input_layer_nodes tensor to (n, output_size, coefficient_size)
+        # Reshape races tensor to separate features and horses
         n = x.shape[0]
-        reshaped_input = x.view(n, self.output_size, self.coefficient_size)
+        reshaped_input = x.view(n, self.coefficient_size, self.output_size)
 
-        # Calculate the element-wise product and sum along the second dimension to compute the utilities
-        # utilities = torch.sum(expanded_weights * reshaped_input, dim=2)
+        # Transpose tensor to have each horse's features together
+        transposed_input = reshaped_input.transpose(1, 2)
 
-        # logits = torch.nn.functional.softmax(utilities, dim=1)
+        # Multiply transposed tensor with coefficients tensor (broadcasted along last dimension)
+        marginal_utilities = transposed_input * self.weights
 
-        # utilities = torch.mm(reshaped_input, expanded_weights.t())
-        utilities = torch.matmul(reshaped_input, self.weights.view(1, self.coefficient_size).t())
+        # Sum multiplied tensor along last dimension
+        utilities = marginal_utilities.sum(dim=-1)
+        
+        return utilities
 
-        logits = torch.nn.functional.softmax(utilities.view(n, self.output_size), dim=1)
+class MLR(nn.Module):
+    """ Parsimonious version of LinSoft intended to replicate a multinomial logit regression with
+    alternative specific variables and generic coefficients only """
+    def __init__(self, input_layer_nodes, output_layer_nodes, bias=None): # bias is unused argument and will be ignored
+        super().__init__()
 
+        self.neural_network = nn.Sequential(
+            ParsLin(input_layer_nodes, output_layer_nodes),
+            nn.Softmax(dim=1)
+        )
+
+    def forward(self, x):
+        logits = self.neural_network(x)
         return logits
 
 ######################
@@ -209,4 +213,3 @@ def test_loop(dataloader, model, loss_fn, device="cpu"): # source: https://pytor
     correct /= size
     print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
     return correct, test_loss
-
