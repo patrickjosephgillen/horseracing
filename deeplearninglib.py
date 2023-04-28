@@ -10,9 +10,13 @@ from sklearn.preprocessing import StandardScaler
 # ----------------------------------------------------------------
 
 class RacesDataset(Dataset):
-    def __init__(self, filename, X_columns, y_columns, parse_dates=None, vacant_stall_indicator=False, scalar=None, continuous_features=[]):
+    def __init__(self, fn1, fn2, XZ_columns, y_columns, parse_dates=None, vacant_stall_indicator=False, scalar=None, continuous_features=[]):
 
-        self.runners = pd.read_csv(filename, parse_dates=parse_dates, infer_datetime_format=True)
+        # X = horse-specific features
+        # Z = race-specific features
+
+        self.runners_long = pd.read_csv(fn1, parse_dates=parse_dates, infer_datetime_format=True)
+        self.races = pd.read_csv(fn2, parse_dates=parse_dates, infer_datetime_format=True)
 
         # Feature Scaling: Standardization (Standard Scaling), applied to continuous features only
         
@@ -21,35 +25,51 @@ class RacesDataset(Dataset):
         else:
             self.scalar = scalar
 
-        if len(continuous_features) > 0:
-            self.runners.loc[:, continuous_features] = self.scalar.fit_transform(self.runners.loc[:, continuous_features])
+        if len(set(self.runners_long.columns).intersection(continuous_features)) > 0:
+            self.runners_long.loc[:, continuous_features] = self.scalar.fit_transform(self.runners_long.loc[:, continuous_features])
+
+        if len(set(self.races.columns).intersection(continuous_features)) > 0:
+            self.races.loc[:, continuous_features] = self.scalar.fit_transform(self.races.loc[:, continuous_features])
    
         # variable indicating whether stall is vacant (1) or not (0), e.g., 10 horses leave 6 stalls vacant
         if vacant_stall_indicator:
-            self.runners["vacant"] = 1
-            X_columns_aug = X_columns + ["vacant"]
+            self.runners_long["vacant"] = 1
+            XZ_columns_aug = XZ_columns + ["vacant"]
         else:
-            X_columns_aug = X_columns
+            XZ_columns_aug = XZ_columns
         
-        self.runners = self.runners[["race_id", "stall_number"] + X_columns_aug + y_columns]
-        self.races = self.runners.pivot(index='race_id', columns='stall_number', values=self.runners.columns[2:]) # credit to Cullen Sun (https://cullensun.medium.com/)
-        rearranged_columns = sorted(list(self.races.columns.values))
-        self.races = self.races[rearranged_columns]
-        self.races = self.races.fillna(0)
+        self.runners_long = self.runners_long[["race_id", "stall_number"] + list(set(self.runners_long.columns).intersection(XZ_columns_aug)) + y_columns]
+        self.runners_wide = self.runners_long.pivot(index='race_id', columns='stall_number', values=self.runners_long.columns[2:]) # credit to Cullen Sun (https://cullensun.medium.com/)
+        rearranged_columns = sorted(list(self.runners_wide.columns.values))
+        self.runners_wide = self.runners_wide[rearranged_columns]
+        self.runners_wide = self.runners_wide.fillna(0)
 
         if vacant_stall_indicator:
-            self.races['vacant'] = np.logical_not(self.races['vacant']).astype(int)
+            self.runners_wide['vacant'] = np.logical_not(self.runners_wide['vacant']).astype(int)
         
-        self.y_columns = [a == 'win' for (a, b) in self.races.columns]
-        self.y = self.races.iloc[:, self.y_columns].values
+        self.y_columns = [a == 'win' for (a, b) in self.runners_wide.columns]
+        self.y = self.runners_wide.iloc[:, self.y_columns].values
         self.X_columns = np.logical_not(self.y_columns)
-        self.X = self.races.iloc[:, self.X_columns].values
+        self.X = self.runners_wide.iloc[:, self.X_columns].values
+
+        self.races = self.races[["race_id"] + list(set(self.races.columns).intersection(XZ_columns))]
+        self.races = self.races.set_index('race_id')
+
+        if len(set(self.races.columns).intersection(XZ_columns)) > 0:
+            self.Z = self.races.values
+            assert self.runners_wide.index.equals(self.races.index), "runners' and races' indices don't match up"
+        else:
+            self.Z = None
 
     def __len__(self):
-        return len(self.races)
+        assert len(self.runners_wide) == len(self.races), "different lengths of runners_wide and races"
+        return len(self.runners_wide)
 
     def __getitem__(self, idx):
-        return self.X[idx], self.y[idx]
+        if self.Z is not None:
+            return np.hstack((self.X[idx], self.Z[idx])), self.y[idx]
+        else:
+            return self.X[idx], self.y[idx]
 
 # ----------------------------------------------------------------
 
