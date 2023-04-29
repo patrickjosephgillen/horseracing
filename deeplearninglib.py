@@ -214,10 +214,10 @@ def train_loop(dataloader, model, loss_fn, optimizer, device="cpu"): # source: h
             loss, current = loss.item(), (batch + 1) * len(X)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
-def test_loop(dataloader, model, loss_fn, device="cpu"): # source: https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
+def validate_loop(dataloader, model, loss_fn, device="cpu"): # source: https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
     size = len(dataloader.dataset)
     num_batches = len(dataloader)
-    test_loss, correct = 0, 0
+    validate_loss, correct = 0, 0
 
     with torch.no_grad():
         for X, y in dataloader:
@@ -226,10 +226,10 @@ def test_loop(dataloader, model, loss_fn, device="cpu"): # source: https://pytor
             y = y.to(device)
         
             pred = model(X.float())
-            test_loss += loss_fn(pred, y).item()
+            validate_loss += loss_fn(pred, y).item()
             correct += (pred.argmax(1) == y.argmax(1)).type(torch.float).sum().item()
 
-    test_loss /= num_batches
+    validate_loss /= num_batches
     correct /= size
-    print(f"Test Error: \n Accuracy: {(100*correct):>0.1f}%, Avg loss: {test_loss:>8f} \n")
-    return correct, test_loss
+    print(f"Validation Error:\n Accuracy: {(100*correct):>0.1f}%, Avg loss: {validate_loss:>8f} \n")
+    return correct, validate_loss
