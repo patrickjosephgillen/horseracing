@@ -21,7 +21,7 @@ class ProbabilityModel:
     def calculate_model_accuracy(self, runners_multiple_races):
         if self.model_probabilities is None:
             self.calculate_model_probabilities_for_multiple_races(runners_multiple_races)
-        df = self.model_probabilities = self.model_probabilities.pivot(index='race_id', columns='stall_number', values=['mod_prob', 'win']) # credit to Cullen Sun (https://cullensun.medium.com/)
+        df = self.model_probabilities.pivot(index='race_id', columns='stall_number', values=['mod_prob', 'win']) # credit to Cullen Sun (https://cullensun.medium.com/)
         df = df.fillna(0)
         correct = np.sum(np.argmax(np.array(df.iloc[:, df.columns.get_level_values(0)=='mod_prob']), axis=1) \
             == np.argmax(np.array(df.iloc[:, df.columns.get_level_values(0)=='win']), axis=1))
