@@ -4,11 +4,15 @@ import numpy as np
 from numpy.random import default_rng
 import matplotlib.pyplot as plt
 
+from importlib import reload
+import deeplearninglib
+reload(deeplearninglib)
+from deeplearninglib import *
+
 # ----------------------------------------------------------------
 
 class ProbabilityModel:
     def __init__(self, model_prefix='undef'):
-        self.model_coefficients = None
         self.model_prefix = model_prefix
         self.model_probabilities = None
     
@@ -48,6 +52,23 @@ class RandomChoiceModel(ProbabilityModel):
 class FavouriteChoiceModel(ProbabilityModel):
     def calculate_model_probabilities_for_single_race(self, runners_single_race):
         return pd.DataFrame({'race_id': runners_single_race.race_id, 'runner_id': runners_single_race.runner_id, 'stall_number': runners_single_race.stall_number, 'win': runners_single_race.win, 'mod_prob': runners_single_race.adj_mkt_prob})
+
+class NeuralNetworkModel(ProbabilityModel):
+    def __init__(self, model_filename, racesdataset_object, model_prefix='undef'):
+        super().__init__(model_prefix)
+        self.model_object = torch.load(model_filename)
+        self.racesdataset_object = racesdataset_object
+
+    def calculate_model_probabilities_for_single_race(self, runners_single_race):
+        inputs = torch.tensor(self.racesdataset_object.get_inputs(runners_single_race.race_id.iloc[0]))
+        mod_prob = self.model_object(inputs.float())
+        mod_prob = mod_prob.detach().numpy()
+        if len(mod_prob.shape) == 2:
+            mod_prob = mod_prob[0] # some neural network architectures return numpy arrays of size (1, output_layer_nodes), e.g., MLR
+        elif len(mod_prob.shape) > 2:
+            raise ValueError("neural network archiecture returned numpy array of unexpected size")
+        mod_prob = mod_prob[0:runners_single_race.shape[0]] # only interested in probabilities for non-vacant
+        return pd.DataFrame({'race_id': runners_single_race.race_id, 'runner_id': runners_single_race.runner_id, 'stall_number': runners_single_race.stall_number, 'win': runners_single_race.win, 'mod_prob': mod_prob})
 
 # ----------------------------------------------------------------
 

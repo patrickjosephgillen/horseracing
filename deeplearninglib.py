@@ -70,6 +70,13 @@ class RacesDataset(Dataset):
             return np.hstack((self.X[idx], self.Z[idx])), self.y[idx]
         else:
             return self.X[idx], self.y[idx]
+        
+    def get_inputs(self, race_id):
+        idx = self.races.index.get_loc(race_id)
+        if self.Z is not None:
+            return np.hstack((self.X[idx], self.Z[idx]))
+        else:
+            return self.X[idx]
 
 # ----------------------------------------------------------------
 
@@ -124,7 +131,7 @@ class ParsLin(nn.Module):
         
         # Check if output_layer_nodes is an integer multiple of input_layer_nodes
         if input_layer_nodes % output_layer_nodes != 0:
-            raise ValueError("inputt_layer_nodes must be an integer multiple of output_layer_nodes")
+            raise ValueError("input_layer_nodes must be an integer multiple of output_layer_nodes")
         
         self.input_size = input_layer_nodes
         self.output_size = output_layer_nodes
@@ -139,7 +146,10 @@ class ParsLin(nn.Module):
 
     def forward(self, x):
         # Reshape races tensor to separate features and horses
-        n = x.shape[0]
+        if len(x.shape) == 1:
+            n = 1 # handle special case of single race (non-batched prediction)
+        else:
+            n = x.shape[0]
         reshaped_input = x.view(n, self.coefficient_size, self.output_size)
 
         # Transpose tensor to have each horse's features together
@@ -196,14 +206,14 @@ class MyLinearLayer(nn.Module): # Source: https://auro-227.medium.com/writing-a-
 
 def train_loop(dataloader, model, loss_fn, optimizer, device="cpu"): # source: https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
     size = len(dataloader.dataset)
-    for batch, (X, y) in enumerate(dataloader):
+    for batch, (inputs, outputs) in enumerate(dataloader):
         # load data to correct device
-        X = X.to(device)
-        y = y.to(device)
+        inputs = inputs.to(device)
+        outputs = outputs.to(device)
         
         # Compute prediction and loss
-        pred = model(X.float())
-        loss = loss_fn(pred, y)
+        pred = model(inputs.float())
+        loss = loss_fn(pred, outputs)
 
         # Backpropagation
         optimizer.zero_grad()
@@ -211,7 +221,7 @@ def train_loop(dataloader, model, loss_fn, optimizer, device="cpu"): # source: h
         optimizer.step()
 
         if batch % 100 == 0:
-            loss, current = loss.item(), (batch + 1) * len(X)
+            loss, current = loss.item(), (batch + 1) * len(inputs)
             print(f"loss: {loss:>7f}  [{current:>5d}/{size:>5d}]")
 
 def validate_loop(dataloader, model, loss_fn, device="cpu"): # source: https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
@@ -220,14 +230,14 @@ def validate_loop(dataloader, model, loss_fn, device="cpu"): # source: https://p
     validate_loss, correct = 0, 0
 
     with torch.no_grad():
-        for X, y in dataloader:
+        for inputs, outputs in dataloader:
             # load data to correct device
-            X = X.to(device)
-            y = y.to(device)
+            inputs = inputs.to(device)
+            outputs = outputs.to(device)
         
-            pred = model(X.float())
-            validate_loss += loss_fn(pred, y).item()
-            correct += (pred.argmax(1) == y.argmax(1)).type(torch.float).sum().item()
+            pred = model(inputs.float())
+            validate_loss += loss_fn(pred, outputs).item()
+            correct += (pred.argmax(1) == outputs.argmax(1)).type(torch.float).sum().item()
 
     validate_loss /= num_batches
     correct /= size
