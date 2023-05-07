@@ -64,11 +64,17 @@ class NeuralNetworkModel(ProbabilityModel):
         mod_prob = self.model_object(inputs.float())
         mod_prob = mod_prob.detach().numpy()
         if len(mod_prob.shape) == 2:
-            mod_prob = mod_prob[0] # some neural network architectures return numpy arrays of size (1, output_layer_nodes), e.g., MLR
+            mod_prob = mod_prob[0]
         elif len(mod_prob.shape) > 2:
-            raise ValueError("neural network archiecture returned numpy array of unexpected size")
-        mod_prob = mod_prob[0:runners_single_race.shape[0]] # only interested in probabilities for non-vacant
-        return pd.DataFrame({'race_id': runners_single_race.race_id, 'runner_id': runners_single_race.runner_id, 'stall_number': runners_single_race.stall_number, 'win': runners_single_race.win, 'mod_prob': mod_prob})
+            raise ValueError("neural network architecture returned numpy array of unexpected size")
+        
+        # Create a DataFrame with stall numbers and their corresponding model probabilities
+        stall_mod_prob_df = pd.DataFrame({'stall_number': np.arange(1, len(mod_prob) + 1), 'mod_prob': mod_prob})
+        
+        # Merge the original runners_single_race DataFrame with the new stall_mod_prob_df DataFrame based on the stall_number
+        merged_df = runners_single_race.merge(stall_mod_prob_df, on='stall_number', how='left')
+
+        return merged_df[['race_id', 'runner_id', 'stall_number', 'win', 'mod_prob']]
 
 # ----------------------------------------------------------------
 
