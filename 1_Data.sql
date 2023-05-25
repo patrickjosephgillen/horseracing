@@ -437,6 +437,8 @@ WHERE
 -- Create additional variables for model MG1 and other versions of this model --
 --------------------------------------------------------------------------------
 
+-- Most of the following code was written by ChatGPT-4
+
 /*
  * Create temporary table for the calculation of various strikes rates
  */
@@ -641,7 +643,7 @@ SET sr_lifetime_class_1 = (
 -- Note, since these new columns may be used in models, strike rates should as of latest date *prior to* current meeting date
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN jockey_sr_KEM FLOAT;
+ADD COLUMN jockey_sr_KEM FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_jockey_sr_KEM;
 
@@ -670,7 +672,7 @@ SET
     r.jockey_sr_KEM = t.win_rate;
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN jockey_sr_LIN FLOAT;
+ADD COLUMN jockey_sr_LIN FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_jockey_sr_LIN;
 
@@ -699,7 +701,7 @@ SET
     r.jockey_sr_LIN = t.win_rate;
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN jockey_sr_SOU FLOAT;
+ADD COLUMN jockey_sr_SOU FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_jockey_sr_SOU;
 
@@ -728,7 +730,7 @@ SET
     r.jockey_sr_SOU = t.win_rate;
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN jockey_sr_WOL FLOAT;
+ADD COLUMN jockey_sr_WOL FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_jockey_sr_WOL;
 
@@ -763,7 +765,7 @@ SET
 -- Note, since these new columns may be used in models, strike rates should as of latest date *prior to* current meeting date
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN trainer_sr_KEM FLOAT;
+ADD COLUMN trainer_sr_KEM FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_trainer_sr_KEM;
 
@@ -792,7 +794,7 @@ SET
     r.trainer_sr_KEM = t.win_rate;
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN trainer_sr_LIN FLOAT;
+ADD COLUMN trainer_sr_LIN FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_trainer_sr_LIN;
 
@@ -821,7 +823,7 @@ SET
     r.trainer_sr_LIN = t.win_rate;
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN trainer_sr_SOU FLOAT;
+ADD COLUMN trainer_sr_SOU FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_trainer_sr_SOU;
 
@@ -850,7 +852,7 @@ SET
     r.trainer_sr_SOU = t.win_rate;
 
 ALTER TABLE smartform.my_runners
-ADD COLUMN trainer_sr_WOL FLOAT;
+ADD COLUMN trainer_sr_WOL FLOAT DEFAULT 0;
 
 DROP TEMPORARY TABLE IF EXISTS tmp_trainer_sr_WOL;
 
@@ -1001,7 +1003,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_KEM_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_KEM_le1mi = (
+SET pos_prior1_KEM_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1017,7 +1019,7 @@ SET pos_prior1_KEM_le1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_KEM_le1mi TINYINT;
@@ -1085,7 +1087,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_LIN_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_LIN_le1mi = (
+SET pos_prior1_LIN_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1101,7 +1103,7 @@ SET pos_prior1_LIN_le1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_LIN_le1mi TINYINT;
@@ -1153,7 +1155,7 @@ SET pos_prior3_LIN_le1mi = COALESCE((
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
-            my_temp
+            my_temp t
         WHERE 
             LIN = 1
             AND t.le1mi = 1
@@ -1169,7 +1171,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_SOU_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_SOU_le1mi = (
+SET pos_prior1_SOU_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1185,7 +1187,7 @@ SET pos_prior1_SOU_le1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_SOU_le1mi TINYINT;
@@ -1253,7 +1255,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_WOL_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_WOL_le1mi = (
+SET pos_prior1_WOL_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1269,7 +1271,7 @@ SET pos_prior1_WOL_le1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_WOL_le1mi TINYINT;
@@ -1343,7 +1345,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_KEM_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_KEM_gt1mi = (
+SET pos_prior1_KEM_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1359,7 +1361,7 @@ SET pos_prior1_KEM_gt1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_KEM_gt1mi TINYINT;
@@ -1427,7 +1429,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_LIN_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_LIN_gt1mi = (
+SET pos_prior1_LIN_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1443,7 +1445,7 @@ SET pos_prior1_LIN_gt1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_LIN_gt1mi TINYINT;
@@ -1511,7 +1513,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_SOU_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_SOU_gt1mi = (
+SET pos_prior1_SOU_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1527,7 +1529,7 @@ SET pos_prior1_SOU_gt1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_SOU_gt1mi TINYINT;
@@ -1595,7 +1597,7 @@ ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior1_WOL_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
-SET pos_prior1_WOL_gt1mi = (
+SET pos_prior1_WOL_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
@@ -1611,7 +1613,7 @@ SET pos_prior1_WOL_gt1mi = (
     ORDER BY 
         t.meeting_date DESC
     LIMIT 1
-);
+), 0);
 
 ALTER TABLE smartform.my_runners
 ADD COLUMN pos_prior2_WOL_gt1mi TINYINT;
