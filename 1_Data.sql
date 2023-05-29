@@ -1007,7 +1007,7 @@ SET pos_prior1_KEM_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1026,48 +1026,15 @@ ADD COLUMN pos_prior2_KEM_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_KEM_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
-            END as finpos,
-            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
-        FROM 
-            my_temp t
-        WHERE 
-            KEM = 1
-            AND t.le1mi = 1
-    ) t
-    WHERE 
-        r.runner_id = t.runner_id
-        AND t.rn = 2
-), 0);
-
-ALTER TABLE smartform.my_runners
-ADD COLUMN pos_prior3_KEM_le1mi TINYINT;
-
-UPDATE smartform.my_runners r
-SET pos_prior3_KEM_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
-    FROM 
-    (
-        SELECT 
-            runner_id, 
-            CASE 
-                WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1081,6 +1048,34 @@ SET pos_prior3_KEM_le1mi = COALESCE((
         AND t.rn = 3
 ), 0);
 
+ALTER TABLE smartform.my_runners
+ADD COLUMN pos_prior3_KEM_le1mi TINYINT;
+
+UPDATE smartform.my_runners r
+SET pos_prior3_KEM_le1mi = COALESCE((
+    SELECT
+		t.finpos
+        END
+    FROM 
+    (
+        SELECT 
+            runner_id, 
+            CASE 
+                WHEN finpos <= 4 THEN finpos
+                ELSE 4
+            END as finpos,
+            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
+        FROM 
+            my_temp t
+        WHERE 
+            KEM = 1
+            AND t.le1mi = 1
+    ) t
+    WHERE 
+        r.runner_id = t.runner_id
+        AND t.rn = 4
+), 0);
+
 -- Lingfield
 
 ALTER TABLE smartform.my_runners
@@ -1091,7 +1086,7 @@ SET pos_prior1_LIN_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1110,18 +1105,15 @@ ADD COLUMN pos_prior2_LIN_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_LIN_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1132,7 +1124,7 @@ SET pos_prior2_LIN_le1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 2
+        AND t.rn = 4
 ), 0);
 
 ALTER TABLE smartform.my_runners
@@ -1140,18 +1132,15 @@ ADD COLUMN pos_prior3_LIN_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior3_LIN_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1162,7 +1151,7 @@ SET pos_prior3_LIN_le1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 3
+        AND t.rn = 4
 ), 0);
 
 -- Southwell
@@ -1175,7 +1164,7 @@ SET pos_prior1_SOU_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1195,17 +1184,14 @@ ADD COLUMN pos_prior2_SOU_le1mi TINYINT;
 UPDATE smartform.my_runners r
 SET pos_prior2_SOU_le1mi = COALESCE((
     SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1216,7 +1202,7 @@ SET pos_prior2_SOU_le1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 2
+        AND t.rn = 4
 ), 0);
 
 ALTER TABLE smartform.my_runners
@@ -1224,18 +1210,15 @@ ADD COLUMN pos_prior3_SOU_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior3_SOU_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1246,7 +1229,7 @@ SET pos_prior3_SOU_le1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 3
+        AND t.rn = 4
 ), 0);
 
 -- Wolverhampton
@@ -1259,7 +1242,7 @@ SET pos_prior1_WOL_le1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1278,48 +1261,15 @@ ADD COLUMN pos_prior2_WOL_le1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_WOL_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
-            END as finpos,
-            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
-        FROM 
-            my_temp t
-        WHERE 
-            WOL = 1
-            AND t.le1mi = 1
-    ) t
-    WHERE 
-        r.runner_id = t.runner_id
-        AND t.rn = 2
-), 0);
-
-ALTER TABLE smartform.my_runners
-ADD COLUMN pos_prior3_WOL_le1mi TINYINT;
-
-UPDATE smartform.my_runners r
-SET pos_prior3_WOL_le1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
-    FROM 
-    (
-        SELECT 
-            runner_id, 
-            CASE 
-                WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1331,6 +1281,33 @@ SET pos_prior3_WOL_le1mi = COALESCE((
     WHERE 
         r.runner_id = t.runner_id
         AND t.rn = 3
+), 0);
+
+ALTER TABLE smartform.my_runners
+ADD COLUMN pos_prior3_WOL_le1mi TINYINT;
+
+UPDATE smartform.my_runners r
+SET pos_prior3_WOL_le1mi = COALESCE((
+    SELECT
+		t.finpos
+    FROM 
+    (
+        SELECT 
+            runner_id, 
+            CASE 
+                WHEN finpos <= 4 THEN finpos
+                ELSE 4
+            END as finpos,
+            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
+        FROM 
+            my_temp t
+        WHERE 
+            WOL = 1
+            AND t.le1mi = 1
+    ) t
+    WHERE 
+        r.runner_id = t.runner_id
+        AND t.rn = 4
 ), 0);
 
 /*
@@ -1349,7 +1326,7 @@ SET pos_prior1_KEM_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1368,48 +1345,15 @@ ADD COLUMN pos_prior2_KEM_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_KEM_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
-            END as finpos,
-            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
-        FROM 
-            my_temp t
-        WHERE 
-            KEM = 1
-            AND t.le1mi = 0
-    ) t
-    WHERE 
-        r.runner_id = t.runner_id
-        AND t.rn = 2
-), 0);
-
-ALTER TABLE smartform.my_runners
-ADD COLUMN pos_prior3_KEM_gt1mi TINYINT;
-
-UPDATE smartform.my_runners r
-SET pos_prior3_KEM_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
-    FROM 
-    (
-        SELECT 
-            runner_id, 
-            CASE 
-                WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1423,6 +1367,33 @@ SET pos_prior3_KEM_gt1mi = COALESCE((
         AND t.rn = 3
 ), 0);
 
+ALTER TABLE smartform.my_runners
+ADD COLUMN pos_prior3_KEM_gt1mi TINYINT;
+
+UPDATE smartform.my_runners r
+SET pos_prior3_KEM_gt1mi = COALESCE((
+    SELECT
+		t.finpos
+    FROM 
+    (
+        SELECT 
+            runner_id, 
+            CASE 
+                WHEN finpos <= 4 THEN finpos
+                ELSE 4
+            END as finpos,
+            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
+        FROM 
+            my_temp t
+        WHERE 
+            KEM = 1
+            AND t.le1mi = 0
+    ) t
+    WHERE 
+        r.runner_id = t.runner_id
+        AND t.rn = 4
+), 0);
+
 -- Lingfield
 
 ALTER TABLE smartform.my_runners
@@ -1433,7 +1404,7 @@ SET pos_prior1_LIN_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1452,48 +1423,15 @@ ADD COLUMN pos_prior2_LIN_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_LIN_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
-            END as finpos,
-            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
-        FROM 
-            my_temp t
-        WHERE 
-            LIN = 1
-            AND t.le1mi = 0
-    ) t
-    WHERE 
-        r.runner_id = t.runner_id
-        AND t.rn = 2
-), 0);
-
-ALTER TABLE smartform.my_runners
-ADD COLUMN pos_prior3_LIN_gt1mi TINYINT;
-
-UPDATE smartform.my_runners r
-SET pos_prior3_LIN_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
-    FROM 
-    (
-        SELECT 
-            runner_id, 
-            CASE 
-                WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1507,6 +1445,33 @@ SET pos_prior3_LIN_gt1mi = COALESCE((
         AND t.rn = 3
 ), 0);
 
+ALTER TABLE smartform.my_runners
+ADD COLUMN pos_prior3_LIN_gt1mi TINYINT;
+
+UPDATE smartform.my_runners r
+SET pos_prior3_LIN_gt1mi = COALESCE((
+    SELECT
+		t.finpos
+    FROM 
+    (
+        SELECT 
+            runner_id, 
+            CASE 
+                WHEN finpos <= 4 THEN finpos
+                ELSE 4
+            END as finpos,
+            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
+        FROM 
+            my_temp t
+        WHERE 
+            LIN = 1
+            AND t.le1mi = 0
+    ) t
+    WHERE 
+        r.runner_id = t.runner_id
+        AND t.rn = 4
+), 0);
+
 -- Southwell
 
 ALTER TABLE smartform.my_runners
@@ -1517,7 +1482,7 @@ SET pos_prior1_SOU_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1536,18 +1501,15 @@ ADD COLUMN pos_prior2_SOU_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_SOU_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1558,7 +1520,7 @@ SET pos_prior2_SOU_gt1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 2
+        AND t.rn = 3
 ), 0);
 
 ALTER TABLE smartform.my_runners
@@ -1566,18 +1528,15 @@ ADD COLUMN pos_prior3_SOU_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior3_SOU_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1588,7 +1547,7 @@ SET pos_prior3_SOU_gt1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 3
+        AND t.rn = 4
 ), 0);
 
 -- Wolverhampton
@@ -1601,7 +1560,7 @@ SET pos_prior1_WOL_gt1mi = COALESCE((
     SELECT 
         CASE 
             WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
+            ELSE 4
         END
     FROM 
         my_temp t
@@ -1620,48 +1579,15 @@ ADD COLUMN pos_prior2_WOL_gt1mi TINYINT;
 
 UPDATE smartform.my_runners r
 SET pos_prior2_WOL_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
+    SELECT
+		t.finpos
     FROM 
     (
         SELECT 
             runner_id, 
             CASE 
                 WHEN finpos <= 4 THEN finpos
-                ELSE 0
-            END as finpos,
-            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
-        FROM 
-            my_temp t
-        WHERE 
-            WOL = 1
-            AND t.le1mi = 0
-    ) t
-    WHERE 
-        r.runner_id = t.runner_id
-        AND t.rn = 2
-), 0);
-
-ALTER TABLE smartform.my_runners
-ADD COLUMN pos_prior3_WOL_gt1mi TINYINT;
-
-UPDATE smartform.my_runners r
-SET pos_prior3_WOL_gt1mi = COALESCE((
-    SELECT 
-        CASE 
-            WHEN t.finpos <= 4 THEN t.finpos
-            ELSE 0
-        END
-    FROM 
-    (
-        SELECT 
-            runner_id, 
-            CASE 
-                WHEN finpos <= 4 THEN finpos
-                ELSE 0
+                ELSE 4
             END as finpos,
             ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
         FROM 
@@ -1673,4 +1599,31 @@ SET pos_prior3_WOL_gt1mi = COALESCE((
     WHERE 
         r.runner_id = t.runner_id
         AND t.rn = 3
+), 0);
+
+ALTER TABLE smartform.my_runners
+ADD COLUMN pos_prior3_WOL_gt1mi TINYINT;
+
+UPDATE smartform.my_runners r
+SET pos_prior3_WOL_gt1mi = COALESCE((
+    SELECT
+		t.finpos
+    FROM 
+    (
+        SELECT 
+            runner_id, 
+            CASE 
+                WHEN finpos <= 4 THEN finpos
+                ELSE 4
+            END as finpos,
+            ROW_NUMBER() OVER (PARTITION BY runner_id ORDER BY meeting_date DESC) as rn
+        FROM 
+            my_temp t
+        WHERE 
+            WOL = 1
+            AND t.le1mi = 0
+    ) t
+    WHERE 
+        r.runner_id = t.runner_id
+        AND t.rn = 4
 ), 0);
