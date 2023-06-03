@@ -92,7 +92,7 @@ CREATE INDEX `idx_my_runners_meeting_date` ON `smartform`.`my_runners` (meeting_
  * Delete (small number of) races, and runners in those races, with aberrant (duplicated or NULL) stall numbers
  */
  
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
  
 CREATE TEMPORARY TABLE my_temp AS
     SELECT 
@@ -145,7 +145,7 @@ ALTER TABLE my_runners DROP COLUMN finish_position, DROP COLUMN amended_position
 
 -- Weed out (small number of) aberrant races with finpos > 16
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
  
 CREATE TEMPORARY TABLE my_temp AS
     SELECT 
@@ -175,7 +175,7 @@ WHERE
 
 -- Assign default value (of average age) to missing ages
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
 
 CREATE TEMPORARY TABLE my_temp AS SELECT 
             ROUND(AVG(age), 0) AS avg_age
@@ -193,7 +193,7 @@ WHERE
 
 -- Weed out races involving horses with aberrant ages (not between 2 and 12 years)
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
  
 CREATE TEMPORARY TABLE my_temp AS
     SELECT 
@@ -221,7 +221,7 @@ WHERE
 
 ALTER TABLE my_runners ADD COLUMN sp FLOAT AFTER starting_price_decimal;
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
 
 CREATE TEMPORARY TABLE my_temp AS SELECT 
             ROUND(AVG(starting_price_decimal), 1) AS avg_sp
@@ -255,7 +255,7 @@ UPDATE my_runners
 SET 
     mkt_prob = 1 / sp;
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
 
 CREATE TEMPORARY TABLE my_temp AS SELECT
          runner_id, race_id, SUM(mkt_prob) OVER(PARTITION BY race_id) AS overage FROM my_runners;
@@ -272,7 +272,7 @@ SET
  * Calculate win percentages of runners (not used in probability models)
  */
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
 
 CREATE TEMPORARY TABLE my_temp AS
 SELECT 
@@ -289,6 +289,102 @@ UPDATE my_runners
         AND my_runners.race_id = my_temp.race_id 
 SET 
     my_runners.win_perc = my_temp.`cumulative wins` / my_temp.`race count`;
+    
+/*
+ * Calculate win percentages of runners for different tracks (not used in probability models)
+ */
+
+-- Kempton
+
+DROP TEMPORARY TABLE IF EXISTS my_temp;
+
+CREATE TEMPORARY TABLE my_temp AS
+SELECT 
+    a.meeting_date, a.race_id, a.runner_id, SUM(a.win) OVER w AS 'cumulative wins', row_number() OVER w AS 'race count'
+FROM my_runners a
+INNER JOIN my_races b
+ON a.race_id = b.race_id 
+WHERE b.course = 'KEMPTON'
+WINDOW w AS (PARTITION BY a.runner_id ORDER BY a.meeting_date, a.race_id)
+ORDER BY a.runner_id ASC, a.race_id ASC;
+
+ALTER TABLE my_runners ADD COLUMN win_perc_KEM FLOAT DEFAULT 0 AFTER win_perc;
+
+UPDATE my_runners
+        INNER JOIN
+    my_temp ON my_runners.runner_id = my_temp.runner_id
+        AND my_runners.race_id = my_temp.race_id 
+SET 
+    my_runners.win_perc_KEM = my_temp.`cumulative wins` / my_temp.`race count`;
+
+-- Lingfield
+
+DROP TEMPORARY TABLE IF EXISTS my_temp;
+
+CREATE TEMPORARY TABLE my_temp AS
+SELECT 
+    a.meeting_date, a.race_id, a.runner_id, SUM(a.win) OVER w AS 'cumulative wins', row_number() OVER w AS 'race count'
+FROM my_runners a
+INNER JOIN my_races b
+ON a.race_id = b.race_id 
+WHERE b.course = 'LINGFIELD'
+WINDOW w AS (PARTITION BY a.runner_id ORDER BY a.meeting_date, a.race_id)
+ORDER BY a.runner_id ASC, a.race_id ASC;
+
+ALTER TABLE my_runners ADD COLUMN win_perc_LIN FLOAT DEFAULT 0 AFTER win_perc_KEM;
+
+UPDATE my_runners
+        INNER JOIN
+    my_temp ON my_runners.runner_id = my_temp.runner_id
+        AND my_runners.race_id = my_temp.race_id 
+SET 
+    my_runners.win_perc_LIN = my_temp.`cumulative wins` / my_temp.`race count`;
+
+-- Southwell
+
+DROP TEMPORARY TABLE IF EXISTS my_temp;
+
+CREATE TEMPORARY TABLE my_temp AS
+SELECT 
+    a.meeting_date, a.race_id, a.runner_id, SUM(a.win) OVER w AS 'cumulative wins', row_number() OVER w AS 'race count'
+FROM my_runners a
+INNER JOIN my_races b
+ON a.race_id = b.race_id 
+WHERE b.course = 'SOUTHWELL'
+WINDOW w AS (PARTITION BY a.runner_id ORDER BY a.meeting_date, a.race_id)
+ORDER BY a.runner_id ASC, a.race_id ASC;
+
+ALTER TABLE my_runners ADD COLUMN win_perc_SOU FLOAT DEFAULT 0 AFTER win_perc_LIN;
+
+UPDATE my_runners
+        INNER JOIN
+    my_temp ON my_runners.runner_id = my_temp.runner_id
+        AND my_runners.race_id = my_temp.race_id 
+SET 
+    my_runners.win_perc_SOU = my_temp.`cumulative wins` / my_temp.`race count`;
+
+-- Wolverhampton
+
+DROP TEMPORARY TABLE IF EXISTS my_temp;
+
+CREATE TEMPORARY TABLE my_temp AS
+SELECT 
+    a.meeting_date, a.race_id, a.runner_id, SUM(a.win) OVER w AS 'cumulative wins', row_number() OVER w AS 'race count'
+FROM my_runners a
+INNER JOIN my_races b
+ON a.race_id = b.race_id 
+WHERE b.course = 'WOLVERHAMPTON'
+WINDOW w AS (PARTITION BY a.runner_id ORDER BY a.meeting_date, a.race_id)
+ORDER BY a.runner_id ASC, a.race_id ASC;
+
+ALTER TABLE my_runners ADD COLUMN win_perc_WOL FLOAT DEFAULT 0 AFTER win_perc_SOU;
+
+UPDATE my_runners
+        INNER JOIN
+    my_temp ON my_runners.runner_id = my_temp.runner_id
+        AND my_runners.race_id = my_temp.race_id 
+SET 
+    my_runners.win_perc_WOL = my_temp.`cumulative wins` / my_temp.`race count`;
 
 /*
  * Calculate strike rates of sires and dams
@@ -296,7 +392,7 @@ SET
 
 -- Note, since sire_sr may be used in models, strike rates should as of latest date *prior to* current meeting date
  
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
  
 CREATE TEMPORARY TABLE my_temp AS SELECT 
     a.runner_id, a.race_id, b.win_perc AS sire_sr
@@ -323,7 +419,7 @@ SET
 
 -- Note, since dam_sr may be used in models, strike rates should as of latest date *prior to* current meeting date
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
  
 CREATE TEMPORARY TABLE my_temp AS SELECT 
     a.runner_id, a.race_id, b.win_perc AS dam_sr
@@ -356,7 +452,7 @@ SET
 
 -- Collapse multiple races on same meeting date
 
-DROP TABLE IF EXISTS trainer_step1;
+DROP TEMPORARY TABLE IF EXISTS trainer_step1;
 
 CREATE TEMPORARY TABLE trainer_step1 AS SELECT trainer_id,
     meeting_date,
@@ -367,7 +463,7 @@ GROUP BY trainer_id , meeting_date
 ORDER BY trainer_id , meeting_date;
 
 -- Calculate cumulative wins and race count as of meeting date
-DROP TABLE IF EXISTS trainer_step2;
+DROP TEMPORARY TABLE IF EXISTS trainer_step2;
 
 CREATE TEMPORARY TABLE trainer_step2 AS
 SELECT 
@@ -378,7 +474,7 @@ ORDER BY trainer_id, meeting_date;
 
 -- Calculate cumulative wins and race count prior to meeting date
 
-DROP TABLE IF EXISTS trainer_step3;
+DROP TEMPORARY TABLE IF EXISTS trainer_step3;
 
 CREATE TEMPORARY TABLE trainer_step3 AS SELECT
   trainer_id, meeting_date,
@@ -414,7 +510,7 @@ SET
   * Delete (small number of) races, and runners in those races, with missing trainer_id, sire_id, dam_id, or gender; or with aberrant gender (i.e., not defined in manual)
   */
 
-DROP TABLE IF EXISTS my_temp;
+DROP TEMPORARY TABLE IF EXISTS my_temp;
 
 CREATE TEMPORARY TABLE my_temp AS
 SELECT DISTINCT(race_id) FROM my_runners WHERE trainer_ID IS NULL OR sire_id IS NULL or dam_id IS NULL or gender IS NULL or gender not in ('G', 'F', 'M', 'C', 'H');
