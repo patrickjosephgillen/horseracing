@@ -607,7 +607,7 @@ FROM
         historic_runners.trainer_id IN (SELECT trainer_id FROM my_runners)
 ) as subquery;
 
-CREATE INDEX idx_meeting_date_id ON my_temp(meeting_date);
+CREATE INDEX idx_meeting_date ON my_temp(meeting_date);
 
 CREATE INDEX idx_runner_id_meeting_date ON my_temp(runner_id, meeting_date);
 CREATE INDEX idx_runner_id_class ON my_temp(runner_id, class);
@@ -623,7 +623,6 @@ CREATE INDEX idx_jockey_id_SOU ON my_temp(jockey_id, SOU);
 CREATE INDEX idx_jockey_id_WOL ON my_temp(jockey_id, WOL);
 
 CREATE INDEX idx_trainer_id ON my_temp(trainer_id);
-CREATE INDEX idx_meeting_date ON my_temp(meeting_date);
 CREATE INDEX idx_trainer_id_KEM ON my_temp(trainer_id, KEM);
 CREATE INDEX idx_trainer_id_LIN ON my_temp(trainer_id, LIN);
 CREATE INDEX idx_trainer_id_SOU ON my_temp(trainer_id, SOU);
@@ -1220,7 +1219,7 @@ SET pos_prior2_LIN_le1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 4
+        AND t.rn = 3
 ), 0);
 
 ALTER TABLE smartform.my_runners
@@ -1298,7 +1297,7 @@ SET pos_prior2_SOU_le1mi = COALESCE((
     ) t
     WHERE 
         r.runner_id = t.runner_id
-        AND t.rn = 4
+        AND t.rn = 3
 ), 0);
 
 ALTER TABLE smartform.my_runners
