@@ -1,4 +1,4 @@
--- This script takes about 47 minutes to execute
+-- This script takes about 4 hours to execute
 
 /*
  * Create my_races
