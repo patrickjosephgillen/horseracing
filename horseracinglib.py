@@ -80,12 +80,12 @@ class NeuralNetworkModel(ProbabilityModel):
 
 class ProbabilityModelAssessment:
     BINS = ((0, 0.05), (0.05, 0.10), (0.10, 0.15), (0.15, 0.20), (0.20, 0.25), (0.25, 0.30), (0.30, 0.35), (0.35, 0.40), (0.40, 0.45), (0.45, 0.50), (0.50, 1.00))
-    MARKERS = ['ro', 'g+', 'bx', 'y.']
-    LINED_MARKERS = ['r-o', 'g-+', 'b-x', 'y-.']
+    MARKERS = ['ro', 'g+', 'bx', 'y.', 'c*']
+    LINED_MARKERS = ['r-o', 'g-+', 'b-x', 'y-.', 'm-*']
 
     def __init__(self, model_list, abridged_runners_multiple_races):
         n = len(model_list)
-        if n < 1 or n > 4:
+        if n < 1 or n > 5:
             raise ValueError('Too few or too many models')
         elif n > len(np.unique([model.model_prefix for model in model_list])):
             raise ValueError('Common model prefixes')
@@ -249,11 +249,11 @@ class WageringStrategy:
 # ----------------------------------------------------------------
 
 class WageringStrategyAssessment:
-    LINED_MARKERS = ['r-o', 'g-+', 'b-x', 'y-.']
+    LINED_MARKERS = ['r-o', 'g-+', 'b-x', 'y-.', 'm-*']
     
     def __init__(self, strategy_list, abridged_runners_multiple_races):
         n = len(strategy_list)
-        if n < 1 or n > 4:
+        if n < 1 or n > 5:
             raise ValueError('Too few or too many strategies')
         elif n > len(np.unique([strategy.strategy_prefix for strategy in strategy_list])):
             raise ValueError('Common strategy prefixes')

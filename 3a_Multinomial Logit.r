@@ -209,8 +209,10 @@ h_dat <- mlogit.data(data = train_data[select_cols],
     shape = "long")
 
 m <- mlogit(win ~
-    age + 
+    age + trainer_sr +
     position1_1 + position1_2 + position1_3 + position1_4 +
+    position2_1 + position2_2 + position2_3 + position2_4 +
+    position3_1 + position3_2 + position3_3 + position3_4 +
     entire + gelding +
     blinkers + cheekpieces + tonguetie +
     sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_3 + sr_lifetime_class_2 + sr_lifetime_class_1 +
