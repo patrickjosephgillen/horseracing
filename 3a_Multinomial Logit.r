@@ -176,3 +176,47 @@ m <- mlogit(win ~
 print(summary(m))
 
 write.csv(data.frame(feature=labels(coefficients(m)), coefficient=coefficients(m)), "models\\MG1_multinomial_logit_coefficients.csv", row.names=F)
+
+# -----------------
+# Fit Amalgum model
+# -----------------
+
+select_cols <- c("race_id", "horse.ref", "runner_id", "win",
+    "age", "sire_sr", "dam_sr", "trainer_sr", "daysLTO",
+    "position1_1", "position1_2", "position1_3", "position1_4",
+    "position2_1", "position2_2", "position2_3", "position2_4",
+    "position3_1", "position3_2", "position3_3", "position3_4",
+    "entire", "gelding",
+    "blinkers", "visor", "cheekpieces", "tonguetie",
+    "sr_30d", "sr_lifetime_class_5", "sr_lifetime_class_4", "sr_lifetime_class_3", "sr_lifetime_class_2", "sr_lifetime_class_1",
+    "jockey_sr_KEM", "jockey_sr_LIN", "jockey_sr_SOU", "jockey_sr_WOL",
+    "trainer_sr_KEM", "trainer_sr_LIN", "trainer_sr_SOU", "trainer_sr_WOL",
+    "jockey_sr_30d", "trainer_sr_30d",
+    "pos_prior1_KEM_le1mi", "pos_prior2_KEM_le1mi", "pos_prior3_KEM_le1mi",
+    "pos_prior1_LIN_le1mi", "pos_prior2_LIN_le1mi", "pos_prior3_LIN_le1mi",
+    "pos_prior1_SOU_le1mi", "pos_prior2_SOU_le1mi", "pos_prior3_SOU_le1mi", 
+    "pos_prior1_WOL_le1mi", "pos_prior2_WOL_le1mi", "pos_prior3_WOL_le1mi",
+    "pos_prior1_KEM_gt1mi", "pos_prior2_KEM_gt1mi", "pos_prior3_KEM_gt1mi",
+    "pos_prior1_LIN_gt1mi", "pos_prior2_LIN_gt1mi", "pos_prior3_LIN_gt1mi",
+    "pos_prior1_SOU_gt1mi", "pos_prior2_SOU_gt1mi", "pos_prior3_SOU_gt1mi",
+    "pos_prior1_WOL_gt1mi", "pos_prior2_WOL_gt1mi", "pos_prior3_WOL_gt1mi",
+    "position1_1", "position1_2", "position1_3", "position1_4",
+    "position2_1", "position2_2", "position2_3", "position2_4",
+    "position3_1", "position3_2", "position3_3", "position3_4")
+
+h_dat <- mlogit.data(data = train_data[select_cols],
+    choice = "win", chid.var = "race_id", alt.var = "horse.ref",
+    shape = "long")
+
+m <- mlogit(win ~
+    age + 
+    position1_1 + position1_2 + position1_3 + position1_4 +
+    entire + gelding +
+    blinkers + cheekpieces + tonguetie +
+    sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_3 + sr_lifetime_class_2 + sr_lifetime_class_1 +
+    jockey_sr_30d + trainer_sr_30d
+    | 0 | 0, data = h_dat)
+
+print(summary(m))
+
+write.csv(data.frame(feature=labels(coefficients(m)), coefficient=coefficients(m)), "models\\Amalgum_multinomial_logit_coefficients.csv", row.names=F)
