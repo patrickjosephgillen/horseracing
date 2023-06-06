@@ -70,7 +70,7 @@ class RacesDataset(Dataset):
         assert len(self.runners_wide) == len(self.races), "different lengths of runners_wide and races"
         return len(self.runners_wide)
 
-    def __getitem__(self, idx): # masks are not consumed
+    def __getitem__(self, idx): # masks aren't consumed
         if self.Z is not None:
             return np.hstack((self.X[idx], self.Z[idx])), self.y[idx], self.mask[idx]
         else:
@@ -215,7 +215,7 @@ class MyLinearLayer(nn.Module): # Source: https://auro-227.medium.com/writing-a-
 
 def train_loop(dataloader, model, loss_fn, optimizer, device="cpu"): # source: https://pytorch.org/tutorials/beginner/basics/optimization_tutorial.html
     size = len(dataloader.dataset)
-    for batch, (inputs, outputs) in enumerate(dataloader):
+    for batch, (inputs, outputs, masks) in enumerate(dataloader): # masks aren't consumed
         # load data to correct device
         inputs = inputs.to(device)
         outputs = outputs.to(device)
@@ -239,7 +239,7 @@ def validate_loop(dataloader, model, loss_fn, device="cpu"): # source: https://p
     validate_loss, correct = 0, 0
 
     with torch.no_grad():
-        for inputs, outputs in dataloader:
+        for inputs, outputs, masks in dataloader: # masks aren't consumed
             # load data to correct device
             inputs = inputs.to(device)
             outputs = outputs.to(device)
