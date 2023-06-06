@@ -30,7 +30,10 @@ class RacesDataset(Dataset):
 
         if len(set(self.races.columns).intersection(continuous_features)) > 0:
             self.races.loc[:, continuous_features] = self.scalar.fit_transform(self.races.loc[:, continuous_features])
-   
+
+        # mask variable for use in loss function (if requested)
+        self.runners_long['mask'] = 1
+
         # variable indicating whether stall is vacant (1) or not (0), e.g., 10 horses leave 6 stalls vacant
         if vacant_stall_indicator:
             self.runners_long["vacant"] = 1
@@ -38,7 +41,7 @@ class RacesDataset(Dataset):
         else:
             XZ_columns_aug = XZ_columns
         
-        self.runners_long = self.runners_long[["race_id", "stall_number"] + list(set(self.runners_long.columns).intersection(XZ_columns_aug)) + y_columns]
+        self.runners_long = self.runners_long[["race_id", "stall_number"] + list(set(self.runners_long.columns).intersection(XZ_columns_aug)) + y_columns + ['mask']]
         self.runners_wide = self.runners_long.pivot(index='race_id', columns='stall_number', values=self.runners_long.columns[2:]) # credit to Cullen Sun (https://cullensun.medium.com/)
         rearranged_columns = sorted(list(self.runners_wide.columns.values))
         self.runners_wide = self.runners_wide[rearranged_columns]
@@ -47,9 +50,11 @@ class RacesDataset(Dataset):
         if vacant_stall_indicator:
             self.runners_wide['vacant'] = np.logical_not(self.runners_wide['vacant']).astype(int)
         
+        self.mask_columns = [a == 'mask' for (a, b) in self.runners_wide.columns]
+        self.mask = self.runners_wide.iloc[:, self.mask_columns].values
         self.y_columns = [a == 'win' for (a, b) in self.runners_wide.columns]
         self.y = self.runners_wide.iloc[:, self.y_columns].values
-        self.X_columns = np.logical_not(self.y_columns)
+        self.X_columns = np.logical_not([(a == 'win' or a == 'mask') for (a, b) in self.runners_wide.columns])
         self.X = self.runners_wide.iloc[:, self.X_columns].values
 
         self.races = self.races[["race_id"] + list(set(self.races.columns).intersection(XZ_columns))]
@@ -65,11 +70,11 @@ class RacesDataset(Dataset):
         assert len(self.runners_wide) == len(self.races), "different lengths of runners_wide and races"
         return len(self.runners_wide)
 
-    def __getitem__(self, idx):
+    def __getitem__(self, idx): # masks are not consumed
         if self.Z is not None:
-            return np.hstack((self.X[idx], self.Z[idx])), self.y[idx]
+            return np.hstack((self.X[idx], self.Z[idx])), self.y[idx], self.mask[idx]
         else:
-            return self.X[idx], self.y[idx]
+            return self.X[idx], self.y[idx], self.mask[idx]
         
     def get_inputs(self, race_id):
         idx = self.races.index.get_loc(race_id)
@@ -77,6 +82,10 @@ class RacesDataset(Dataset):
             return np.hstack((self.X[idx], self.Z[idx]))
         else:
             return self.X[idx]
+
+    def get_masks(self, race_id):
+        idx = self.races.index.get_loc(race_id)
+        return self.mask[idx]
 
 # ----------------------------------------------------------------
 
@@ -156,12 +165,12 @@ class ParsLin(nn.Module):
         transposed_input = reshaped_input.transpose(1, 2)
 
         # Multiply transposed tensor with coefficients tensor (broadcasted along last dimension)
-        marginal_utilities = transposed_input * self.weights
+        marginal_logits = transposed_input * self.weights
 
         # Sum multiplied tensor along last dimension
-        utilities = marginal_utilities.sum(dim=-1)
+        logits = marginal_logits.sum(dim=-1)
         
-        return utilities
+        return logits
 
 class MLR(nn.Module):
     """ Parsimonious version of LinSoft intended to replicate a multinomial logit regression with
