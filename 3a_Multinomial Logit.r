@@ -159,18 +159,17 @@ m <- mlogit(win ~
     pos_prior1_KEM_gt1mi + pos_prior2_KEM_gt1mi + pos_prior3_KEM_gt1mi +
     pos_prior1_LIN_gt1mi + pos_prior2_LIN_gt1mi + pos_prior3_LIN_gt1mi +
     pos_prior1_SOU_gt1mi + pos_prior2_SOU_gt1mi + pos_prior3_SOU_gt1mi + 
-    pos_prior1_WOL_gt1mi + pos_prior2_WOL_gt1mi + pos_prior3_WOL_gt1mi +
-    position1_1 + position1_2 + position1_3 + position1_4 +
-    position2_1 + position2_2 + position2_3 + position2_4 +
-    position3_1 + position3_2 + position3_3 + position3_4
+    pos_prior1_WOL_gt1mi + pos_prior2_WOL_gt1mi + pos_prior3_WOL_gt1mi
     | 0 | 0, data = h_dat)
 
 print(summary(m))
 
 m <- mlogit(win ~
     sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_3 + sr_lifetime_class_2 + sr_lifetime_class_1 +
+    jockey_sr_KEM + jockey_sr_LIN +
+    trainer_sr_SOU +
     jockey_sr_30d + trainer_sr_30d +
-    position1_1 + position1_2 + position1_3 + position1_4
+    pos_prior1_KEM_le1mi + pos_prior1_LIN_le1mi + pos_prior1_SOU_le1mi + pos_prior2_WOL_le1mi
     | 0 | 0, data = h_dat)
 
 print(summary(m))
@@ -215,8 +214,11 @@ m <- mlogit(win ~
     position3_1 + position3_2 + position3_3 + position3_4 +
     entire + gelding +
     blinkers + cheekpieces + tonguetie +
-    sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_3 + sr_lifetime_class_2 + sr_lifetime_class_1 +
-    jockey_sr_30d + trainer_sr_30d
+    sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_1 +
+    jockey_sr_KEM + jockey_sr_LIN +
+    trainer_sr_SOU +
+    jockey_sr_30d + trainer_sr_30d +
+    pos_prior1_KEM_le1mi + pos_prior1_LIN_le1mi + pos_prior1_SOU_le1mi + pos_prior2_WOL_le1mi
     | 0 | 0, data = h_dat)
 
 print(summary(m))
