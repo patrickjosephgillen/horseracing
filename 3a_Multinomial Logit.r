@@ -126,7 +126,7 @@ train_data$pos_prior1_WOL_gt1mi <- train_data$pos_prior1_WOL_gt1mi * train_data$
 train_data$pos_prior2_WOL_gt1mi <- train_data$pos_prior2_WOL_gt1mi * train_data$course_Wolverhampton * train_data$gt1mi
 train_data$pos_prior3_WOL_gt1mi <- train_data$pos_prior3_WOL_gt1mi * train_data$course_Wolverhampton * train_data$gt1mi
 
-select_cols <- c("race_id", "horse.ref", "runner_id", "win",
+select_cols <- c("race_id", "horse.ref", "runner_id", "win", "stall_number",
     "sr_30d", "sr_lifetime_class_5", "sr_lifetime_class_4", "sr_lifetime_class_3", "sr_lifetime_class_2", "sr_lifetime_class_1",
     "jockey_sr_KEM", "jockey_sr_LIN", "jockey_sr_SOU", "jockey_sr_WOL",
     "trainer_sr_KEM", "trainer_sr_LIN", "trainer_sr_SOU", "trainer_sr_WOL",
@@ -148,7 +148,7 @@ h_dat <- mlogit.data(data = train_data[select_cols],
     shape = "long")
 
 m <- mlogit(win ~
-    sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_3 + sr_lifetime_class_2 + sr_lifetime_class_1 +
+    stall_number + sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_3 + sr_lifetime_class_2 + sr_lifetime_class_1 +
     jockey_sr_KEM + jockey_sr_LIN + jockey_sr_SOU + jockey_sr_WOL +
     trainer_sr_KEM + trainer_sr_LIN + trainer_sr_SOU + trainer_sr_WOL +
     jockey_sr_30d + trainer_sr_30d +
@@ -209,9 +209,9 @@ h_dat <- mlogit.data(data = train_data[select_cols],
 
 m <- mlogit(win ~
     age + trainer_sr +
-    position1_1 + position1_2 + position1_3 + position1_4 +
-    position2_1 + position2_2 + position2_3 + position2_4 +
-    position3_1 + position3_2 + position3_3 + position3_4 +
+    position1_1 + position1_2 + position1_3 +
+    position2_2 +
+    position3_2 +
     entire + gelding +
     blinkers + cheekpieces + tonguetie +
     sr_30d + sr_lifetime_class_5 + sr_lifetime_class_4 + sr_lifetime_class_1 +
