@@ -266,6 +266,8 @@ class WageringStrategyAssessment:
             self.assessment = abridged_runners_multiple_races
         
         for strategy in self.strategy_list:
+            if strategy.strategy_stakes_and_payoffs is None:
+                raise ValueError('call \'calculate_strategy_stakes_and_payoffs_for_multiple_races\' before initiating \'WageringStrategyAssessment\'')
             self.assessment = pd.merge(self.assessment, strategy.strategy_stakes_and_payoffs[['race_id', 'runner_id', 'mod_prob', 'strat_stake', 'strat_payoff']].rename({'mod_prob': strategy.strategy_prefix + '_mod_prob', 'strat_stake': strategy.strategy_prefix + '_strat_stake', 'strat_payoff': strategy.strategy_prefix + '_strat_payoff',}, axis=1, inplace=False), how='left', on=['runner_id', 'race_id'], validate='1:1')
         self.assessment_has_been_performed = False
     
