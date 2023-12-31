@@ -7,7 +7,7 @@
 library("dplyr")
 library("mlogit")
 
-setwd(dirname(sys.frame(1)$ofile))
+# setwd(dirname(sys.frame(1)$ofile))
 train_data <- read.csv(file.path("data\\runners_train.csv"))
 
 # Read only the first row to get the column names
