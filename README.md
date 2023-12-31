@@ -68,6 +68,14 @@ Now, every time you commit a Jupyter notebook, nbstripout will automatically cle
 Note: This method doesn't clear the output in your local copies of the notebooks, only in the versions that you commit. If you want to clear the output in your local copies, you should do it manually in Jupyter.
 Note: This setup is done on a per-repository basis. If you want to set up nbstripout for all your repositories, you can set it up as a global Git filter.
 
+## What is W&B?
+
+Weights & Biases (W&B) is the AI developer platform, with tools for training models, fine-tuning models, and leveraging foundation models.
+
+Set up W&B in 5 minutes, then quickly iterate on your machine learning pipeline with the confidence that your models and data are tracked and versioned in a reliable system of record.
+
+[Install W&B and start tracking your machine learning experiments in minutes](https://docs.wandb.ai/quickstart)
+
 # Installation
 
 git clone https://github.com/patrickjosephgillen/horseracing.git
@@ -78,5 +86,13 @@ git clone https://github.com/patrickjosephgillen/horseracing.git
 2. [NumPy](https://numpy.org/doc/stable/user/absolute_beginners.html)
 3. [Pandas](https://pandas.pydata.org/docs/getting_started/index.html)
 4. [Git and GitHub for Beginners - Crash Course](https://www.youtube.com/watch?v=RGOj5yH7evk)
-5. SmartForm Database User Manual
-6. 
+5. historic_data.zip\manual.pdf (SmartForm Database User Manual
+6. [PyTorch Crash Course - Getting Started with Deep Learning](https://www.youtube.com/watch?v=OIenNRt2bjg)
+7. [MySQL Crash Course | Learn SQL](https://www.youtube.com/watch?v=9ylj9NR0Lcg)
+8. [Deep Learning Crash Course for Beginners](https://www.youtube.com/watch?v=VyWAvY2CF9c)
+9. Horse Racing 3Q22.html (favourites export) esp.
+ 	* [All Weather Racing and All Weather Horse Racing Systems](https://betting-sites.me.uk/all-weather-horse-racing-systems/#:~:text=%20Six%20Quick%20Facts%20About%20All%20Weather%20Races,horses%20since%20they%20are%20either%20inexperienced...%20More%20)
+	* [Use Machine Learning to Predict Horse Racing](https://towardsdatascience.com/use-machine-learning-to-predict-horse-racing-4f1111fb6ced)
+ 	* [https://kouohhashi.medium.com/deep-learning-and-horse-race-prediction-1-ed65727f9d27](https://kouohhashi.medium.com/deep-learning-and-horse-race-prediction-1-ed65727f9d27)
+ 	* [What is backpropagation really doing? | Chapter 3, Deep learning](https://m.youtube.com/watch?v=Ilg3gGewQ5U&t=36s)
+	* [Backpropagation calculus | Chapter 4, Deep learning](https://www.youtube.com/watch?v=tIeHLnjs5U8&ab_channel=3Blue1Brown)
