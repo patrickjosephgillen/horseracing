@@ -80,7 +80,7 @@ Set up W&B in 5 minutes, then quickly iterate on your machine learning pipeline 
 
 git clone https://github.com/patrickjosephgillen/horseracing.git
 
-# Useful Background
+# Useful Background Knowledge
 
 1. [Python](https://docs.python.org/3/tutorial/index.html)
 2. [NumPy](https://numpy.org/doc/stable/user/absolute_beginners.html)
