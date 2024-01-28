@@ -4,7 +4,7 @@ Form AI
 
 # Project Author
 
-Patrick Gillen
+Patrick J. Gillen
 
 # Project Description
 
