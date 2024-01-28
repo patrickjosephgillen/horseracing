@@ -2,6 +2,10 @@
 
 Form AI
 
+# Project Author
+
+Patrick Gillen
+
 # Project Description
 
 A deep learning model for All Weather horse racing
