@@ -1,6 +1,6 @@
 # Project Title
 
-FormAI
+Form AI
 
 # Project Description
 
@@ -36,7 +36,7 @@ A deep learning model for All Weather horse racing
 	* pip install mysql-connector (because it failed in MySQL installation step above)
 	* Add location of mysql to User Path
 
-6. Install Smartform database
+6. [Install Smartform database](https://drive.google.com/drive/folders/1BRLT4uH0gtgwt-3MZUrW9raPXsO1-0aM?usp=sharing)
 	* CREATE USER 'smartform'@'localhost' IDENTIFIED BY 'smartform';
 	* ALTER USER 'smartform'@'localhost' IDENTIFIED WITH mysql_native_password BY 'smartform';
 	* CREATE DATABASE smartform;
@@ -80,7 +80,7 @@ Set up W&B in 5 minutes, then quickly iterate on your machine learning pipeline 
 
 git clone https://github.com/patrickjosephgillen/horseracing.git
 
-# Useful Background
+# Useful Background Knowledge
 
 1. [Python](https://docs.python.org/3/tutorial/index.html)
 2. [NumPy](https://numpy.org/doc/stable/user/absolute_beginners.html)
